@@ -16,8 +16,48 @@ Or you can run it from Maven directly using the Spring Boot Maven plugin. If you
 ```
 ./mvnw spring-boot:run
 ```
-To get the orders from the server, query the below endpoint
 
+To get only the new orders in the last 24 hours from the server, query the below endpoint
+### GET: /<res_id>/order?token=<access_token>
+Sample Response
+
+```
+[
+    {
+        "order": {
+            "aggregator": 1,
+            "aggname": "Test",
+            "orderno": "7646707645",
+            "restaurantid": "12345",
+            "token": "1000",
+            "discount": "0",
+            "packingcharges": "0"
+        },
+        "items": [
+            {
+                "item": "Upma",
+                "qty": 1,
+                "amount": "73",
+                "variant": "null",
+                "positemcode": null,
+                "aggitemcode": "677"
+            },
+            {
+                "item": "Tea Without Sugar",
+                "qty": 1,
+                "amount": "37",
+                "variant": "null",
+                "positemcode": null,
+                "aggitemcode": "644"
+            }
+        ],
+        "createdAt": "2022-08-31T10:11:43.416+00:00",
+        "updatedAt": null
+    }
+]
+```
+
+To get all the orders in the last 24 hours from the server, query the below endpoint
 ### GET: /<res_id>/orders?token=<access_token>
 Sample Response
 
