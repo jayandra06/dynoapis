@@ -35,20 +35,12 @@ Sample Response
         },
         "items": [
             {
-                "item": "Upma",
+                "item": "Test Name",
                 "qty": 1,
                 "amount": "73",
                 "variant": "null",
                 "positemcode": null,
                 "aggitemcode": "677"
-            },
-            {
-                "item": "Tea Without Sugar",
-                "qty": 1,
-                "amount": "37",
-                "variant": "null",
-                "positemcode": null,
-                "aggitemcode": "644"
             }
         ],
         "createdAt": "2022-08-31T10:11:43.416+00:00",
