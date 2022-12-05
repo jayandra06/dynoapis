@@ -7,8 +7,7 @@ import lombok.Data;
 
 @Data
 public class OrderRequest {
-    private Order order;
-    private List<Item> items;
+    private List<Order> orders;
     Timestamp createdAt;
     Timestamp updatedAt;
 }
