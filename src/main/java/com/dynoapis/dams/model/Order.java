@@ -1,14 +1,14 @@
 package com.dynoapis.dams.model;
 
+import java.util.Map;
+
 import lombok.Data;
 
 @Data
 public class Order {
-    private int aggregator;
-    private String aggname;
-    private String orderno;
-    private String restaurantid;
-    private String token;
-    private String discount;
-    private String packingcharges;
+    private String vendor;
+    private String orderId;
+    private String resId;
+    private String status;
+    private Map<String, Object> data;
 }
