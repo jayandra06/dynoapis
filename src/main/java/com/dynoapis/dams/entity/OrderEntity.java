@@ -23,18 +23,23 @@ public class OrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_json", length = 1500)
+    @Column(name = "order_json", columnDefinition = "TEXT")
     private String orderJson;
 
-    @Column(name = "token_res_id")
-    private String resTokenId;
+    @Column(name = "status_response_json", columnDefinition = "TEXT")
+    private String statusResponse;
 
     @Column(name = "order_id", unique=true)
     private String orderId;
 
-    private String restaurantId;
+    private String vendor;
 
-    private String accessToken;
+    private String status;
+
+    private int statusCode;
+
+    @Column(name = "res_id")
+    private String restaurantId;
 
     @Column(name = "is_processed")
     private boolean isProcessed;
