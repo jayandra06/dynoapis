@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,8 @@ import com.dynoapis.dams.entity.ErrorObject;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
+
+	Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 	
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<ErrorObject> handleExpenseNotFoundException(ResourceNotFoundException ex, WebRequest request) {
@@ -27,6 +31,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 		errorObject.setStatus(HttpStatus.NOT_FOUND.value());
 		errorObject.setMessage(ex.getMessage());
 		errorObject.setTimestamp(new Date());
+		logger.error(ex.getMessage(), ex);
 		return new ResponseEntity<ErrorObject>(errorObject, HttpStatus.NOT_FOUND);
 	}
 
@@ -36,6 +41,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 		errorObject.setStatus(HttpStatus.BAD_REQUEST.value());
 		errorObject.setMessage(ex.getMessage());
 		errorObject.setTimestamp(new Date());
+		logger.error(ex.getMessage(), ex);
 		return new ResponseEntity<ErrorObject>(errorObject, HttpStatus.BAD_REQUEST);
 	}
 	
@@ -45,6 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 		errorObject.setStatus(HttpStatus.BAD_REQUEST.value());
 		errorObject.setMessage(ex.getMessage());
 		errorObject.setTimestamp(new Date());
+		logger.error(ex.getMessage(), ex);
 		return new ResponseEntity<ErrorObject>(errorObject, HttpStatus.BAD_REQUEST);
 	}
 	
@@ -54,6 +61,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 		errorObject.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		errorObject.setMessage(ex.getMessage());
 		errorObject.setTimestamp(new Date());
+		logger.error(ex.getMessage(), ex);
 		return new ResponseEntity<ErrorObject>(errorObject, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
@@ -70,6 +78,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 			.collect(Collectors.toList());
 		
 		body.put("messages", errors);
+		logger.error(ex.getMessage(), ex);
 		return new ResponseEntity<Object>(body, HttpStatus.BAD_REQUEST);
 	}
 	
