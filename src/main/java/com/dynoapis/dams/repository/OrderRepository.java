@@ -9,6 +9,12 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 
-    List<OrderEntity> findByResTokenIdAndCreatedAtBetween(String orderId, Timestamp startDate, Timestamp endDate);
+    List<OrderEntity> findByRestaurantIdAndCreatedAtBetween(String resId, Timestamp startDate, Timestamp endDate);
+    
+    OrderEntity findByOrderId(String orderId);
+
+    List<OrderEntity> findByRestaurantId(String resId);
+
+    boolean existsByOrderId(String orderId);
 
 }
