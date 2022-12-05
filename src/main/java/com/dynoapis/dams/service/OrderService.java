@@ -8,10 +8,14 @@ import com.dynoapis.dams.model.OrderRequest;
 
 public interface OrderService {
     
-    Map<String, Object> saveOrder(OrderRequest order);
+    List<Map<String, Object>> saveOrder(OrderRequest order);
 
-    List<Object> getUnProcessedOrders(String orderId, Timestamp startDate, Timestamp endDate);
+    List<Object> getUnProcessedOrders(String resId, Timestamp startDate, Timestamp endDate);
 
-    List<Object> getOrders(String orderId, Timestamp startDate, Timestamp endDate);
+    List<Object> getOrders(String resId, Timestamp startDate, Timestamp endDate);
+
+    List<Map<String, Object>> getOrdersByStatus(String restaurantId);
+
+    Map<String, Object> saveOrderStatus(String orderId, int statusCode, Map<String, Object> statusResponse);
 
 }
