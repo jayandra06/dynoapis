@@ -61,10 +61,14 @@ public class OrdersController {
     }
 
     @GetMapping("/api/v1/{restaurantId}/orders/status")
-    public List<Map<String, Object>> getActionsToBePerformed(@PathVariable String restaurantId) {
+    public Map<String, Object> getActionsToBePerformed(@PathVariable String restaurantId) {
         return orderService.getOrdersByStatus(restaurantId);
     }
 
+    @PostMapping("/api/v1/{restaurantId}/orders/history")
+    public Map<String, Object> insertOrderHistory(@PathVariable String restaurantId, @RequestBody Map<String, Object> json) {
+        return orderService.saveOrderHistory(restaurantId, json);
+    }
 
     @PostMapping("/api/v1/orders/{orderId}/status")
     public Map<String, Object> getActionsPerformed(@PathVariable String orderId, @RequestBody OrderStatus order) {
