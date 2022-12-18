@@ -1,13 +1,14 @@
 package com.dynoapis.dams.model;
 
+import java.util.Map;
+
 import lombok.Data;
 
 @Data
 public class Item {
-    private String item;
-    private int qty;
-    private String amount;
-    private String variant;
-    private String positemcode;
-    private String aggitemcode;
+    private String entityId;
+    private Boolean stockStatus;
+    private Boolean isProcessed;
+    private String aggregator;
+    private Map<String, Object> statusResponse;
 }
