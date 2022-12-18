@@ -11,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dynoapis.dams.entity.OrderEntity;
+import com.dynoapis.dams.entity.OrderHistoryEntity;
 import com.dynoapis.dams.exceptions.DBException;
 import com.dynoapis.dams.exceptions.ResourceNotFoundException;
 import com.dynoapis.dams.model.OrderRequest;
+import com.dynoapis.dams.repository.OrderHistoryRepository;
 import com.dynoapis.dams.repository.OrderRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -24,6 +26,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private OrderHistoryRepository orderHistoryRepository;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -92,11 +96,23 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Map<String, Object>> getOrdersByStatus(String restaurantId) {
+    public Map<String, Object> getOrdersByStatus(String restaurantId) {
         List<Map<String, Object>> list = new ArrayList<>();
+        Map<String, Object> response = new HashMap<>();
         List<OrderEntity> orderEntity = orderRepository.findByRestaurantId(restaurantId);
+        List<OrderHistoryEntity> orderHistoryEntities = orderHistoryRepository.findByRestaurantId(restaurantId);
+        List<Map<String, Object>> histories = new ArrayList<>();
+        orderHistoryEntities.forEach(x-> {
+            if((x.getAggregator().equalsIgnoreCase("swiggy") || x.getAggregator().equalsIgnoreCase("zomato")) && x.isRequestedStatus()) {
+                Map<String, Object> historyEntities = new HashMap<>();
+                historyEntities.put("aggregator", x.getAggregator().toLowerCase());
+                histories.add(historyEntities);
+            }
+        });
+        response.put("orderHistory", histories);
         if (orderEntity.isEmpty()) {
-            return list;
+            response.put("orders", list);
+            return response;
         }
         orderEntity.stream().forEach(x-> {
             Map<String, Object> data = new HashMap<>();
@@ -109,7 +125,8 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
         });
-        return list;   
+        response.put("orders", list);
+        return response;   
     }
 
     @Override
@@ -155,6 +172,34 @@ public class OrderServiceImpl implements OrderService {
                 return new HashMap<String, String>();
             }
         }).collect(Collectors.toList());
+    }
+
+    public Map<String, Object> saveOrderHistory(String resId, Map<String, Object> json) {
+        if (!json.containsKey("statusResponse") || !json.containsKey("aggregator"))
+            throw new DBException("Invalid Request being sent");
+        String aggregator = json.get("aggregator").toString().toUpperCase().trim();
+        OrderHistoryEntity orderHistoryEntity = orderHistoryRepository.findByRestaurantIdAndAggregator(resId, aggregator);
+        if(orderHistoryEntity == null) {
+            orderHistoryEntity = new OrderHistoryEntity();
+            orderHistoryEntity.setRestaurantId(resId);
+        }
+        orderHistoryEntity.setAggregator(aggregator);
+        if (json.containsKey("status")) {
+            orderHistoryEntity.setRequestedStatus(Boolean.valueOf(json.get("status").toString().trim()));
+        } else
+            orderHistoryEntity.setRequestedStatus(false);
+        String jsonString;
+        try {
+            jsonString = objectMapper.writeValueAsString(json.get("statusResponse"));
+            orderHistoryEntity.setOrdersJson(jsonString);
+            orderHistoryRepository.save(orderHistoryEntity);
+        } catch (JsonProcessingException e) {
+            throw new DBException(e.getMessage());
+        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", 200);
+        response.put("message", "Request Successful");
+        return response;
     }
     
 }
