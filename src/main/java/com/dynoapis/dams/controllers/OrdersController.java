@@ -33,7 +33,7 @@ public class OrdersController {
     @Autowired
     private ErrorRepository errorRepository;
         
-    @GetMapping("/status")
+    @GetMapping("/")
     public Map<String, Object> index() {
         Map<String, Object> response = new HashMap<>();
         response.put("status", 200);
