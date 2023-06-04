@@ -95,8 +95,9 @@ public class ItemServiceImpl implements ItemService {
         List<Map<String, Object>> items = new ArrayList<>();;
         response.put("restaurantId", resId);
         List<ItemEntity> itemEntities = itemRepository.findByRestaurantId(resId);
+        ItemsStatusEntity itemsStatusEntity = itemsStatusRepository.findByRestaurantId(resId);
         if(itemEntities.isEmpty()) {
-            response.put("getAllItems", false);
+            response.put("getAllItems", (itemsStatusEntity != null) ? itemsStatusEntity.getRequestedStatus() : false);
             response.put("categories", categories);
             response.put("items", items);
             return response;
@@ -119,7 +120,6 @@ public class ItemServiceImpl implements ItemService {
                 }
             }
         });
-        ItemsStatusEntity itemsStatusEntity = itemsStatusRepository.findByRestaurantId(resId);
         response.put("getAllItems", (itemsStatusEntity != null) ? itemsStatusEntity.getRequestedStatus() : false);
         response.put("categories", categories);
         response.put("items", items);
