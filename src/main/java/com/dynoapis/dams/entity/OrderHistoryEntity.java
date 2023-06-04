@@ -29,10 +29,8 @@ public class OrderHistoryEntity {
     @Column(name = "restaurant_id")
     private String restaurantId;
 
-    private String aggregator;
-
     @Column(name = "requested_status")
-    private boolean requestedStatus;
+    private Boolean requestedStatus;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
