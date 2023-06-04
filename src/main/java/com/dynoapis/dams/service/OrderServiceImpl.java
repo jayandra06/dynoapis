@@ -96,20 +96,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<Object> getAllOrders(Timestamp startDate, Timestamp endDate) {
+        List<OrderEntity> orderEntity = orderRepository.findByCreatedAtBetween(startDate, endDate);
+        return getOrderJson(orderEntity);
+    }
+
+    @Override
     public Map<String, Object> getOrdersByStatus(String restaurantId) {
         List<Map<String, Object>> list = new ArrayList<>();
         Map<String, Object> response = new HashMap<>();
         List<OrderEntity> orderEntity = orderRepository.findByRestaurantId(restaurantId);
-        List<OrderHistoryEntity> orderHistoryEntities = orderHistoryRepository.findByRestaurantId(restaurantId);
-        List<Map<String, Object>> histories = new ArrayList<>();
-        orderHistoryEntities.forEach(x-> {
-            if((x.getAggregator().equalsIgnoreCase("swiggy") || x.getAggregator().equalsIgnoreCase("zomato")) && x.isRequestedStatus()) {
-                Map<String, Object> historyEntities = new HashMap<>();
-                historyEntities.put("aggregator", x.getAggregator().toLowerCase());
-                histories.add(historyEntities);
-            }
-        });
-        response.put("orderHistory", histories);
+        OrderHistoryEntity orderHistoryEntity = orderHistoryRepository.findByRestaurantId(restaurantId);
+        response.put("orderHistory", (orderHistoryEntity != null) ? orderHistoryEntity.getRequestedStatus() : false);
         if (orderEntity.isEmpty()) {
             response.put("orders", list);
             return response;
@@ -175,22 +173,21 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public Map<String, Object> saveOrderHistory(String resId, Map<String, Object> json) {
-        if (!json.containsKey("statusResponse") || !json.containsKey("aggregator"))
-            throw new DBException("Invalid Request being sent");
-        String aggregator = json.get("aggregator").toString().toUpperCase().trim();
-        OrderHistoryEntity orderHistoryEntity = orderHistoryRepository.findByRestaurantIdAndAggregator(resId, aggregator);
+        OrderHistoryEntity orderHistoryEntity = orderHistoryRepository.findByRestaurantId(resId);
         if(orderHistoryEntity == null) {
             orderHistoryEntity = new OrderHistoryEntity();
             orderHistoryEntity.setRestaurantId(resId);
         }
-        orderHistoryEntity.setAggregator(aggregator);
         if (json.containsKey("status")) {
             orderHistoryEntity.setRequestedStatus(Boolean.valueOf(json.get("status").toString().trim()));
         } else
             orderHistoryEntity.setRequestedStatus(false);
         String jsonString;
         try {
-            jsonString = objectMapper.writeValueAsString(json.get("statusResponse"));
+            if (json.containsKey("statusResponse")) 
+                jsonString = objectMapper.writeValueAsString(json.get("statusResponse"));
+            else
+                jsonString = "";
             orderHistoryEntity.setOrdersJson(jsonString);
             orderHistoryRepository.save(orderHistoryEntity);
         } catch (JsonProcessingException e) {
@@ -198,7 +195,7 @@ public class OrderServiceImpl implements OrderService {
         }
         Map<String, Object> response = new HashMap<>();
         response.put("status", 200);
-        response.put("message", "Request Successful");
+        response.put("message", "Order History Status Updated Successfully");
         return response;
     }
     
