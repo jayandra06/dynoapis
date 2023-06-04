@@ -33,7 +33,7 @@ public class OrdersController {
     @Autowired
     private ErrorRepository errorRepository;
         
-    @GetMapping("/")
+    @GetMapping("/status")
     public Map<String, Object> index() {
         Map<String, Object> response = new HashMap<>();
         response.put("status", 200);
@@ -58,6 +58,20 @@ public class OrdersController {
         Timestamp startDate = new Timestamp(startToday.getTimeInMillis());
         Timestamp endDate = new Timestamp(System.currentTimeMillis());
         return orderService.getOrders(restaurantId, startDate, endDate);
+    }
+
+    @GetMapping("/api/v1/orders")
+    public List<Object> getAllOrders() {
+        Calendar startToday = Calendar.getInstance();
+        TimeZone tz = TimeZone.getTimeZone("IST");
+        startToday.setTimeZone(tz);
+        startToday.add(Calendar.HOUR_OF_DAY, -168);
+        startToday.set(Calendar.MINUTE, 0);
+        startToday.set(Calendar.SECOND, 0);
+        startToday.set(Calendar.MILLISECOND, 0);
+        Timestamp startDate = new Timestamp(startToday.getTimeInMillis());
+        Timestamp endDate = new Timestamp(System.currentTimeMillis());
+        return orderService.getAllOrders(startDate, endDate);
     }
 
     @GetMapping("/api/v1/{restaurantId}/orders/status")
