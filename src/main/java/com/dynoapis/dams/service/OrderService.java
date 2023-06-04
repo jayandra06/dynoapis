@@ -13,6 +13,7 @@ public interface OrderService {
     List<Object> getUnProcessedOrders(String resId, Timestamp startDate, Timestamp endDate);
 
     List<Object> getOrders(String resId, Timestamp startDate, Timestamp endDate);
+    List<Object> getAllOrders(Timestamp startDate, Timestamp endDate);
 
     Map<String, Object> getOrdersByStatus(String restaurantId);
 
