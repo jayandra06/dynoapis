@@ -96,7 +96,7 @@ public class ItemServiceImpl implements ItemService {
         response.put("restaurantId", resId);
         List<ItemEntity> itemEntities = itemRepository.findByRestaurantId(resId);
         if(itemEntities.isEmpty()) {
-            response.put("all_items", new ArrayList<>());
+            response.put("getAllItems", false);
             response.put("categories", categories);
             response.put("items", items);
             return response;
@@ -119,39 +119,29 @@ public class ItemServiceImpl implements ItemService {
                 }
             }
         });
-        List<ItemsStatusEntity> itemsStatusEntities = itemsStatusRepository.findByRestaurantId(resId);
-        List<Map<String, Object>> statuses = new ArrayList<>();
-        itemsStatusEntities.forEach(x-> {
-            if((x.getAggregator().equalsIgnoreCase("swiggy") || x.getAggregator().equalsIgnoreCase("zomato"))
-                && x.isRequestedStatus()) {
-                    Map<String, Object> statusEntities = new HashMap<>();
-                    statusEntities.put("aggregator", x.getAggregator().toLowerCase());
-                    statuses.add(statusEntities);
-                }
-        });
-        response.put("all_items", statuses);
+        ItemsStatusEntity itemsStatusEntity = itemsStatusRepository.findByRestaurantId(resId);
+        response.put("getAllItems", (itemsStatusEntity != null) ? itemsStatusEntity.getRequestedStatus() : false);
         response.put("categories", categories);
         response.put("items", items);
         return response;
     }
 
     public Map<String, Object> saveItemAggregatorStatus(String resId, Map<String, Object> json) {
-        if (!json.containsKey("statusResponse") || !json.containsKey("aggregator"))
-            throw new DBException("Invalid Request being sent");
-        String aggregator = json.get("aggregator").toString().toUpperCase().trim();
-        ItemsStatusEntity itemsStatusEntity = itemsStatusRepository.findByRestaurantIdAndAggregator(resId, aggregator);
+        ItemsStatusEntity itemsStatusEntity = itemsStatusRepository.findByRestaurantId(resId);
         if(itemsStatusEntity == null) {
             itemsStatusEntity = new ItemsStatusEntity();
             itemsStatusEntity.setRestaurantId(resId);
         }
-        itemsStatusEntity.setAggregator(aggregator);
         if (json.containsKey("status")) {
             itemsStatusEntity.setRequestedStatus(Boolean.valueOf(json.get("status").toString().trim()));
         } else
             itemsStatusEntity.setRequestedStatus(false);
         String jsonString;
         try {
-            jsonString = objectMapper.writeValueAsString(json.get("statusResponse"));
+            if (json.containsKey("statusResponse"))
+                jsonString = objectMapper.writeValueAsString(json.get("statusResponse"));
+            else 
+                jsonString = "";
             itemsStatusEntity.setItemsJson(jsonString);
             itemsStatusRepository.save(itemsStatusEntity);
         } catch (JsonProcessingException e) {
@@ -159,7 +149,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Map<String, Object> response = new HashMap<>();
         response.put("status", 200);
-        response.put("message", "Request Successful");
+        response.put("message", "Get Items Status Updated Successfully");
         return response;
     }
     
