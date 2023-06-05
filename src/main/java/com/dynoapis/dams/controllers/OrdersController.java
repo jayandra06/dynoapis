@@ -28,7 +28,7 @@ public class OrdersController {
     @Autowired
     private ErrorRepository errorRepository;
         
-    @GetMapping("/")
+    @GetMapping("/status")
     public Map<String, Object> index() {
         Map<String, Object> response = new HashMap<>();
         response.put("status", 200);
