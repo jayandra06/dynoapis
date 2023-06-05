@@ -8,6 +8,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.dynoapis.dams.entity.OrderEntity;
@@ -99,6 +103,13 @@ public class OrderServiceImpl implements OrderService {
     public List<Object> getAllOrders(Timestamp startDate, Timestamp endDate) {
         List<OrderEntity> orderEntity = orderRepository.findByCreatedAtBetween(startDate, endDate);
         return getOrderJson(orderEntity);
+    }
+
+    @Override
+    public List<Object> getAllOrders(int pageNo, int pageSize) {
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by("createdAt").descending());
+        Page<OrderEntity> orderEntity = orderRepository.findAll(paging);
+        return getOrderJson(orderEntity.toList());
     }
 
     @Override
