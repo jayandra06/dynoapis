@@ -60,7 +60,7 @@ public class OrdersController {
                                      @RequestParam(value = "size", defaultValue = "0") int size ) {
         System.out.println(page);
         System.out.println(size);
-        if(page == 0 || size == 0) {
+        if(page == 0 && size == 0) {
             Calendar startToday = Calendar.getInstance();
             TimeZone tz = TimeZone.getTimeZone("IST");
             startToday.setTimeZone(tz);
