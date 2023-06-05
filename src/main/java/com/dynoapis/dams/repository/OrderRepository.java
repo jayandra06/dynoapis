@@ -1,13 +1,13 @@
 package com.dynoapis.dams.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.dynoapis.dams.entity.OrderEntity;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.sql.Timestamp;
 import java.util.List;
 
-public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
+public interface OrderRepository extends PagingAndSortingRepository<OrderEntity, Long> {
 
     List<OrderEntity> findByRestaurantIdAndCreatedAtBetween(String resId, Timestamp startDate, Timestamp endDate);
     List<OrderEntity> findByCreatedAtBetween(Timestamp startDate, Timestamp endDate);
