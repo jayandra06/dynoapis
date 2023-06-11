@@ -8,12 +8,18 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.dynoapis.dams.entity.OrderEntity;
+import com.dynoapis.dams.entity.OrderHistoryEntity;
 import com.dynoapis.dams.exceptions.DBException;
 import com.dynoapis.dams.exceptions.ResourceNotFoundException;
 import com.dynoapis.dams.model.OrderRequest;
+import com.dynoapis.dams.repository.OrderHistoryRepository;
 import com.dynoapis.dams.repository.OrderRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -24,6 +30,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private OrderHistoryRepository orderHistoryRepository;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -92,11 +100,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Map<String, Object>> getOrdersByStatus(String restaurantId) {
+    public List<Object> getAllOrders(Timestamp startDate, Timestamp endDate) {
+        List<OrderEntity> orderEntity = orderRepository.findByCreatedAtBetween(startDate, endDate);
+        return getOrderJson(orderEntity);
+    }
+
+    @Override
+    public List<Object> getAllOrders(int pageNo, int pageSize) {
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by("createdAt").descending());
+        Page<OrderEntity> orderEntity = orderRepository.findAll(paging);
+        return getOrderJson(orderEntity.toList());
+    }
+
+    @Override
+    public Map<String, Object> getOrdersByStatus(String restaurantId) {
         List<Map<String, Object>> list = new ArrayList<>();
+        Map<String, Object> response = new HashMap<>();
         List<OrderEntity> orderEntity = orderRepository.findByRestaurantId(restaurantId);
+        OrderHistoryEntity orderHistoryEntity = orderHistoryRepository.findByRestaurantId(restaurantId);
+        response.put("orderHistory", (orderHistoryEntity != null) ? orderHistoryEntity.getRequestedStatus() : false);
         if (orderEntity.isEmpty()) {
-            return list;
+            response.put("orders", list);
+            return response;
         }
         orderEntity.stream().forEach(x-> {
             Map<String, Object> data = new HashMap<>();
@@ -109,7 +134,8 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
         });
-        return list;   
+        response.put("orders", list);
+        return response;   
     }
 
     @Override
@@ -155,6 +181,33 @@ public class OrderServiceImpl implements OrderService {
                 return new HashMap<String, String>();
             }
         }).collect(Collectors.toList());
+    }
+
+    public Map<String, Object> saveOrderHistory(String resId, Map<String, Object> json) {
+        OrderHistoryEntity orderHistoryEntity = orderHistoryRepository.findByRestaurantId(resId);
+        if(orderHistoryEntity == null) {
+            orderHistoryEntity = new OrderHistoryEntity();
+            orderHistoryEntity.setRestaurantId(resId);
+        }
+        if (json.containsKey("status")) {
+            orderHistoryEntity.setRequestedStatus(Boolean.valueOf(json.get("status").toString().trim()));
+        } else
+            orderHistoryEntity.setRequestedStatus(false);
+        String jsonString;
+        try {
+            if (json.containsKey("statusResponse")) 
+                jsonString = objectMapper.writeValueAsString(json.get("statusResponse"));
+            else
+                jsonString = "";
+            orderHistoryEntity.setOrdersJson(jsonString);
+            orderHistoryRepository.save(orderHistoryEntity);
+        } catch (JsonProcessingException e) {
+            throw new DBException(e.getMessage());
+        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", 200);
+        response.put("message", "Order History Status Updated Successfully");
+        return response;
     }
     
 }

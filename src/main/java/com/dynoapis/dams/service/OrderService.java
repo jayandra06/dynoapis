@@ -13,9 +13,14 @@ public interface OrderService {
     List<Object> getUnProcessedOrders(String resId, Timestamp startDate, Timestamp endDate);
 
     List<Object> getOrders(String resId, Timestamp startDate, Timestamp endDate);
+    List<Object> getAllOrders(Timestamp startDate, Timestamp endDate);
 
-    List<Map<String, Object>> getOrdersByStatus(String restaurantId);
+    List<Object> getAllOrders(int pageNo, int pageSize);
+
+    Map<String, Object> getOrdersByStatus(String restaurantId);
 
     Map<String, Object> saveOrderStatus(String orderId, int statusCode, Map<String, Object> statusResponse);
+
+    Map<String, Object> saveOrderHistory(String resId, Map<String, Object> json);
 
 }
